@@ -23,7 +23,7 @@ class SpreadWidget(QtGui.QWidget,object):
         self.parent = parent
         QtGui.QWidget.__init__(self, parent)
         self.eventEngine = eventEngine
-        self.eventEngine.start()
+        #self.eventEngine.start()
         self.eventEngine.register("showData", self.showData)
         self.web_view = QWebEngineView()
         self.url_string = "file:///./html/spread.html"

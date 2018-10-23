@@ -63,7 +63,7 @@ class TestWidget(QtGui.QWidget,object):
         self.setWindowIcon(QtGui.QIcon('./icons/stock.ico'))
 
         self.eventEngine = eventEngine
-        self.eventEngine.start()
+        #self.eventEngine.start()
         self.eventEngine.register("showData",self.showData)
 
         self.view = pg.GraphicsView()

@@ -15,7 +15,8 @@ class TabDemo(QTabWidget):
         ui = TestWidget(ee)
         self.tab1 = ui
         self.tab2 = StatisticWidget(ee1)
-        self.tab3 = SpreadWidget(ee2)
+        self.tab3 = SpreadWidget(ee)
+        ee.start()
 
         self.addTab(self.tab1, "持仓分布")
         self.addTab(self.tab2, "历史统计")
