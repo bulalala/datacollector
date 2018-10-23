@@ -26,7 +26,6 @@ class TestWidget(QtGui.QWidget,object):
         self.eventEngine.start()
         self.eventEngine.register("showData", self.showData)
         self.web_view = QWebEngineView()
-
         self.url_string = "file:///./html/spread.html"
         self.web_view.load(QUrl(self.url_string))
 
@@ -37,13 +36,13 @@ class TestWidget(QtGui.QWidget,object):
         self.label_date.setText(U"日期")
         self.label_long = QtWidgets.QLabel(self)
         self.label_long.setGeometry(QtCore.QRect(0, 0, 31, 25))
-        self.label_long.setFixedSize(40, 35)
+        self.label_long.setFixedSize(60, 35)
         self.label_long.setObjectName("label_long")
         self.label_long.setText(U"第一腿")
         self.label_short = QtWidgets.QLabel(self)
         self.label_short.setGeometry(QtCore.QRect(0, 0, 31, 25))
-        self.label_short.setFixedSize(40, 35)
-        self.label_short.setObjectName("label_long")
+        self.label_short.setFixedSize(60, 35)
+        self.label_short.setObjectName("label_short")
         self.label_short.setText(U"第二腿")
         self.cbb_date = QtWidgets.QComboBox(self)
         self.cbb_date.setGeometry(QtCore.QRect(500, 0, 51, 25))
@@ -60,7 +59,6 @@ class TestWidget(QtGui.QWidget,object):
         self.lineEdit_short = QtWidgets.QLineEdit(self)
         self.lineEdit_short.setGeometry(QtCore.QRect(210, 70, 181, 111))
         self.lineEdit_short.setObjectName("lineEdit_short")
-
         self.vb_fistline = QtGui.QHBoxLayout()
         self.vb_fistline.addWidget(self.label_date)
         self.vb_fistline.addWidget(self.cbb_date)
@@ -70,7 +68,6 @@ class TestWidget(QtGui.QWidget,object):
         self.vb_fistline.addWidget(self.lineEdit_short)
         self.vb_fistline.addWidget(self.btn_load)
         self.vb_fistline.addStretch(2)
-
         self.hb = QtGui.QHBoxLayout()
         self.hb.addWidget(self.web_view)
         self.lastb = QtGui.QVBoxLayout()
@@ -80,7 +77,6 @@ class TestWidget(QtGui.QWidget,object):
         self.web_view.show()
         self.tradingdays = db.getOpenIntTradingDay()
         self.initModel()
-
         self.c = Communicate()
         self.c.emitButton.connect(self.emitSignal)
 
@@ -107,11 +103,13 @@ class TestWidget(QtGui.QWidget,object):
         data = db.getDataByTradingday(tradingday)
         data_1 = data[data.symbol == symbol_long]
         data_2 = data[data.symbol == symbol_short]
+        if len(data_1) == 0 or len(data_2) == 0:
+            print('no datas')
+            return
         data_1 = data_1[['symbol', 'company', 'quatity']]
         data_2 = data_2[['symbol', 'company', 'quatity']]
         df = pd.merge(data_1, data_2, on='company', how='inner')
         df['director'] = df['quatity_x'] * df['quatity_y']
-        multi_data = pd.DataFrame()
         x = []
         y = []
         for i in range(0, len(df)):
@@ -134,11 +132,6 @@ class TestWidget(QtGui.QWidget,object):
             rst_short.columns = ['company', 'qty', 'title']
             rst_short[['qty']] = -rst_short[['qty']]
             rst_short = rst_short.sort_values(by='qty', ascending=False)
-
-        # df = pd.DataFrame()
-        # df.append(rst_long)
-        # df.append(rst_short)
-        # print(df)
         df = pd.DataFrame()
         df = df.append(rst_short)
         df = df.append(rst_long)
@@ -147,7 +140,7 @@ class TestWidget(QtGui.QWidget,object):
         title = 'sp:{}/{}({})'.format(symbol_long, symbol_short,tradingday)
         bar = Bar(title)
         if len(df) > 0:
-            bar.add("持仓量", df['company'].values.tolist(), df['qty'].values.tolist(), is_convert=True)
+            bar.add("持仓量", df['company'].values.tolist(), df['qty'].values.tolist(), is_convert=True, mark_point=["max", "min"])
         else:
             bar.add("持仓量", [], [], is_convert=True)
         bar.render('./html/spread.html')
@@ -155,8 +148,9 @@ class TestWidget(QtGui.QWidget,object):
     def emitSignal(self, p):
         self.web_view.load(QUrl(self.url_string))
 
-app = QtGui.QApplication(sys.argv)
-ee = EventEngine()
-ui = TestWidget(ee)
-ui.showMaximized()
-app.exec_()
+if __name__ == '__main__':
+    app = QtGui.QApplication(sys.argv)
+    ee = EventEngine()
+    ui = TestWidget(ee)
+    ui.showMaximized()
+    app.exec_()
