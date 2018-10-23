@@ -15,7 +15,7 @@ db = dbWrapper('postgres-fj7nqbmu.sql.tencentcdb.com')
 class Communicate(QObject):
     emitButton = pyqtSignal(float)
 
-class TestWidget(QtGui.QWidget,object):
+class SpreadWidget(QtGui.QWidget,object):
     Signal = QtCore.pyqtSignal()
     #----------------------------------------------------------------------
     def __init__(self,eventEngine,parent=None):
@@ -151,6 +151,6 @@ class TestWidget(QtGui.QWidget,object):
 if __name__ == '__main__':
     app = QtGui.QApplication(sys.argv)
     ee = EventEngine()
-    ui = TestWidget(ee)
+    ui = SpreadWidget(ee)
     ui.showMaximized()
     app.exec_()
