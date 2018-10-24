@@ -2,15 +2,28 @@
 from datetime import datetime
 from dbWrapper import dbWrapper
 import pandas as pd
+import pyecharts.echarts.events as events
 from pyecharts import Bar
+from pyecharts_javascripthon.dom import alert
 from PyQt5 import QtGui, QtCore,QtWidgets
 from PyQt5.QtCore import pyqtSignal,QObject,QUrl
 from PyQt5.QtWebEngineWidgets import QWebEngineView
 from eventEngine import *
 import sys
+import os
 
 
 db = dbWrapper('postgres-fj7nqbmu.sql.tencentcdb.com')
+
+
+def color_function(params):
+    if params.value > 0:
+        return '#FF4500'
+    else:
+        return '#54ffff'
+
+def on_click():
+    alert("点击事件触发")
 
 class Communicate(QObject):
     emitButton = pyqtSignal(float)
@@ -26,6 +39,9 @@ class SpreadWidget(QtGui.QWidget,object):
         self.eventEngine.start()
         self.eventEngine.register("showData", self.showData)
         self.web_view = QWebEngineView()
+        if not (os.path.exists('./html')):
+            print('no!!!')
+            os.makedirs('./html')
         self.url_string = "file:///./html/spread.html"
         self.web_view.load(QUrl(self.url_string))
 
@@ -132,6 +148,7 @@ class SpreadWidget(QtGui.QWidget,object):
             rst_short.columns = ['company', 'qty', 'title']
             rst_short[['qty']] = -rst_short[['qty']]
             rst_short = rst_short.sort_values(by='qty', ascending=False)
+
         df = pd.DataFrame()
         df = df.append(rst_short)
         df = df.append(rst_long)
@@ -139,10 +156,17 @@ class SpreadWidget(QtGui.QWidget,object):
         print(df['qty'].values.tolist())
         title = 'sp:{}/{}({})'.format(symbol_long, symbol_short,tradingday)
         bar = Bar(title)
+        bar.use_theme('macarons')
         if len(df) > 0:
             bar.add("持仓量", df['company'].values.tolist(), df['qty'].values.tolist(), is_convert=True, mark_point=["max", "min"])
         else:
             bar.add("持仓量", [], [], is_convert=True)
+        bar._option['series'][0]['itemStyle'] = {
+            'normal': {
+                'color': color_function,
+            }
+        }
+        #bar.on(events.MOUSE_CLICK, on_click)
         bar.render('./html/spread.html')
 
     def emitSignal(self, p):

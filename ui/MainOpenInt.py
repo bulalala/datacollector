@@ -4,7 +4,9 @@ from PyQt5.QtWidgets import *
 from uiOpenInt import TestWidget
 from ui_statistic_openint import StatisticWidget
 from eventEngine import *
-from ui.ui_spread_widgets import SpreadWidget
+from ui_spread_widgets import SpreadWidget
+import sys
+sys.setrecursionlimit(5000)
 
 class TabDemo(QTabWidget):
     def __init__(self, parent=None):
@@ -21,7 +23,6 @@ class TabDemo(QTabWidget):
         self.addTab(self.tab2, "历史统计")
         self.addTab(self.tab3, "配对分析")
         self.setTabPosition(QTabWidget.West)
-
         self.setWindowTitle("持仓分析")
 
 if __name__ == '__main__':
